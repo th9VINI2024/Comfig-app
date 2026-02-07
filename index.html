@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Config Pro</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#020617">
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:linear-gradient(180deg,#020617,#0f172a);
+  color:#fff;
+}
+header{
+  padding:20px;
+  font-size:22px;
+  font-weight:700;
+  text-align:center;
+}
+.container{
+  padding:16px;
+  max-width:420px;
+  margin:auto;
+}
+select,button{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  border-radius:14px;
+  border:none;
+  font-size:16px;
+}
+button{
+  background:#38bdf8;
+  color:#000;
+  font-weight:700;
+}
+.result{
+  margin-top:20px;
+  background:#020617;
+  padding:16px;
+  border-radius:16px;
+  animation:fade .3s ease;
+}
+.item{margin:10px 0}
+.small{opacity:.6;font-size:13px}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+</style>
+</head>
+
+<body>
+
+<header>Config Pro 📱🎯</header>
+
+<div class="container">
+
+<div class="small">
+📲 Detecção automática do seu aparelho ativa
+</div>
+
+<select id="brand" onchange="loadModels()">
+  <option value="">Marca (opcional)</option>
+  <option>Samsung</option>
+  <option>Xiaomi</option>
+  <option>Motorola</option>
+</select>
+
+<select id="model">
+  <option value="">Modelo (opcional)</option>
+</select>
+
+<button onclick="generate()">Gerar configuração</button>
+
+<div class="result" id="result" style="display:none"></div>
+
+</div>
+
+<script>
+/* MODELOS POPULARES (REFERÊNCIA) */
+const models={
+  Samsung:{
+    "Galaxy A14":{factor:1},
+    "Galaxy A23":{factor:1}
+  },
+  Xiaomi:{
+    "Redmi Note 7":{factor:1},
+    "Redmi Note 12":{factor:0.98}
+  },
+  Motorola:{
+    "Moto G05":{factor:1},
+    "Moto G14":{factor:0.98}
+  }
+};
+
+function loadModels(){
+  const b=brand.value;
+  model.innerHTML="<option value=''>Modelo (opcional)</option>";
+  if(!models[b])return;
+  Object.keys(models[b]).forEach(m=>{
+    const o=document.createElement("option");
+    o.textContent=m;
+    model.appendChild(o);
+  });
+}
+
+/* DETECÇÃO AUTOMÁTICA */
+function getScreen(){
+  return {
+    w:Math.min(screen.width,screen.height),
+    h:Math.max(screen.width,screen.height),
+    ratio:screen.height/screen.width
+  };
+}
+
+function generate(){
+  const scr=getScreen();
+
+  /* MENOR LARGURA BASE */
+  let menor=Math.round(411*(16/9)/scr.ratio);
+  menor=Math.max(320,Math.min(440,menor));
+
+  /* SENSIBILIDADE BASE */
+  let sens=Math.round(200-(scr.w/5));
+  sens=Math.max(90,Math.min(180,sens));
+
+  /* AJUSTE POR MODELO (SE ESCOLHER) */
+  const b=brand.value;
+  const m=model.value;
+  if(models[b] && models[b][m]){
+    menor=Math.round(menor*models[b][m].factor);
+    sens=Math.round(sens*models[b][m].factor);
+  }
+
+  result.style.display="block";
+  result.innerHTML=`
+    <div class="item">📏 Menor largura recomendada: <b>${menor}</b></div>
+    <div class="item">🎯 Sensibilidade base: <b>${sens}</b></div>
+    <div class="item small">
+      Cálculo baseado na sua tela real (${scr.w}x${scr.h})
+    </div>
+    <div class="item small">
+      Use como ponto inicial e ajuste aos poucos
+    </div>
+  `;
+}
+
+/* PWA */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
+</body>
+</html>
