@@ -1,0 +1,13 @@
+{
+  "name": "Config Pro",
+  "short_name": "ConfigPro",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "icons": [{
+    "src": "https://cdn-icons-png.flaticon.com/512/3064/3064197.png",
+    "sizes": "512x512",
+    "type": "image/png"
+  }]
+}
