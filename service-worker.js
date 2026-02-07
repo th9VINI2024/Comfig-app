@@ -1,30 +1,28 @@
-const CACHE = "config-pro-v2";
+const CACHE = "config-pro-v3";
 
-self.addEventListener("install", e => {
+self.addEventListener("install", event => {
   self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE).then(c =>
-      c.addAll([
-        "/Config-app/",
-        "/Config-app/index.html",
-        "/Config-app/manifest.json"
+  event.waitUntil(
+    caches.open(CACHE).then(cache =>
+      cache.addAll([
+        "./",
+        "./index.html",
+        "./manifest.json"
       ])
     )
   );
 });
 
-self.addEventListener("activate", e => {
-  e.waitUntil(
+self.addEventListener("activate", event => {
+  event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys.map(k => k !== CACHE && caches.delete(k))
-      )
+      Promise.all(keys.map(k => k !== CACHE && caches.delete(k)))
     )
   );
 });
 
-self.addEventListener("fetch", e => {
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    caches.match(event.request).then(resp => resp || fetch(event.request))
   );
 });
