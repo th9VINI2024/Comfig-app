@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Config Pro</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#020617">
-
 <style>
 :root{
   --bg:#020617;
@@ -102,17 +99,16 @@ button{
 </div>
 
 <script>
-/* MODELOS */
 const modelos={
   xiaomi:{
-    "Redmi 13C":{w:393,h:873},
-    "Redmi Note 7":{w:393,h:851}
+    "Redmi 13C": 392,
+    "Redmi Note 7": 392
   },
   samsung:{
-    "Galaxy A10":{w:360,h:760}
+    "Galaxy A10": 360
   },
   motorola:{
-    "Moto G05":{w:391,h:870}
+    "Moto G05": 392
   }
 };
 
@@ -135,59 +131,47 @@ brand.onchange=()=>{
   model.disabled=false;
 };
 
-/* DETECÇÃO AUTOMÁTICA */
+function clamp(v,min,max){
+  return Math.max(min,Math.min(max,v));
+}
+
 function detectar(){
-  const ua=navigator.userAgent;
-  let marca="Desconhecida";
-
-  if(/Xiaomi|Redmi/i.test(ua)) marca="Xiaomi";
-  else if(/Samsung/i.test(ua)) marca="Samsung";
-  else if(/Moto/i.test(ua)) marca="Motorola";
-
   document.getElementById("deviceInfo").innerHTML=`
-    Marca: ${marca}<br>
-    Tela: ${screen.width} × ${screen.height}
+    Tela detectada: ${screen.width} × ${screen.height}<br>
+    Detecção automática ativa
   `;
 }
 
-/* GERAR CONFIG */
 function gerar(){
-  let w = screen.width;
-  let h = screen.height;
-  let modo = "Automático";
+  let menorLargura;
+  let modo="Automático";
 
-  // Se escolher manualmente
   if(brand.value && model.value){
-    const d = modelos[brand.value][model.value];
-    w = d.w;
-    h = d.h;
-    modo = "Manual";
+    menorLargura=modelos[brand.value][model.value];
+    modo="Manual";
+  }else{
+    menorLargura=clamp(screen.width,360,960);
   }
 
-  /* 📐 MENOR LARGURA (360 → 960) */
-  let menorLargura = Math.round(w);
+  let sensBase=clamp(Math.round(menorLargura/3),0,200);
 
-  if(menorLargura < 360) menorLargura = 360;
-  if(menorLargura > 960) menorLargura = 960;
-
-  /* 🎯 SENSIBILIDADE (0 → 200) */
-  let sensibilidade = Math.round((menorLargura - 360) / (960 - 360) * 200);
-
-  if(sensibilidade < 0) sensibilidade = 0;
-  if(sensibilidade > 200) sensibilidade = 200;
-
-  document.getElementById("result").innerHTML = `
+  document.getElementById("result").innerHTML=`
     🧠 Modo: <b>${modo}</b><br><br>
 
-    📐 Menor largura: <b>${menorLargura}</b><br>
-    🎯 Sensibilidade base: <b>${sensibilidade}</b><br><br>
+    📐 Menor largura: <b>${menorLargura}</b><br><br>
 
-    📱 Tela usada: ${w} × ${h}<br><br>
+    🎯 Sensibilidade Free Fire<br>
+    Geral: ${sensBase}<br>
+    Red Dot: ${clamp(sensBase-5,0,200)}<br>
+    Mira 2x: ${clamp(sensBase-15,0,200)}<br>
+    Mira 4x: ${clamp(sensBase-30,0,200)}<br>
+    AWM: ${clamp(sensBase-50,0,200)}<br><br>
 
-    👉 Se ficar rápido demais, reduza 5–10 no jogo<br>
-    👉 Se ficar lento, aumente 5–10
+    👉 Tudo dentro do limite 0–200<br>
+    👉 Sem multiplicação maluca 😌
   `;
 }
+
 detectar();
 </script>
 
