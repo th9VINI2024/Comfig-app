@@ -27,19 +27,16 @@ body{
   color:var(--text);
 }
 
-/* Header */
 header{
   padding:16px;
   font-size:22px;
   font-weight:600;
 }
 
-/* Container */
 .container{
   padding:16px;
 }
 
-/* Card */
 .card{
   background:var(--card);
   border-radius:14px;
@@ -60,7 +57,16 @@ header{
   font-size:15px;
 }
 
-/* Button */
+select{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  background:#020617;
+  color:#fff;
+  margin-top:8px;
+}
+
 button{
   width:100%;
   padding:14px;
@@ -87,45 +93,116 @@ button{
     <span id="deviceInfo">Detectando...</span>
   </div>
 
-  <!-- EXEMPLO DE AÇÃO -->
+  <!-- SELEÇÃO MANUAL -->
+  <div class="card">
+    <b>📲 Escolher aparelho manualmente (opcional)</b>
+
+    <select id="manualBrand">
+      <option value="">Automático</option>
+      <option value="motorola">Motorola</option>
+      <option value="samsung">Samsung</option>
+      <option value="xiaomi">Xiaomi</option>
+    </select>
+
+    <select id="manualModel">
+      <option value="">Selecione o modelo</option>
+    </select>
+  </div>
+
+  <!-- RESULTADO -->
   <div class="card">
     <b>⚙️ Configuração</b>
-    <span>
-      Use as informações do seu aparelho para gerar a sensibilidade
-      e menor largura ideais.
+    <span id="result">
+      Use a detecção automática ou escolha manualmente.
     </span>
   </div>
 
-  <button onclick="alert('Em breve 😻')">Gerar configuração</button>
+  <button onclick="gerarConfiguracao()">Gerar configuração</button>
 
 </div>
 
 <script>
+/* MODELOS */
+const modelos = {
+  motorola:{
+    "Moto G05":{w:391,h:870},
+    "Moto G22":{w:412,h:915}
+  },
+  samsung:{
+    "Galaxy A10":{w:360,h:760},
+    "Galaxy A20":{w:412,h:892}
+  },
+  xiaomi:{
+    "Redmi Note 7":{w:393,h:851},
+    "Redmi 9":{w:393,h:873},
+    "Redmi 13C":{w:393,h:873}
+  }
+};
+
+const brandSel = document.getElementById("manualBrand");
+const modelSel = document.getElementById("manualModel");
+
+brandSel.onchange = ()=>{
+  modelSel.innerHTML = `<option value="">Selecione o modelo</option>`;
+  if(!brandSel.value) return;
+
+  Object.keys(modelos[brandSel.value]).forEach(m=>{
+    const opt=document.createElement("option");
+    opt.value=m;
+    opt.textContent=m;
+    modelSel.appendChild(opt);
+  });
+};
+
+/* DETECÇÃO AUTOMÁTICA */
 function detectarAparelho(){
   const ua = navigator.userAgent;
-  let marca = "Desconhecida";
+  let marca="Desconhecida";
 
-  if(/Samsung/i.test(ua)) marca = "Samsung";
-  else if(/Motorola|Moto/i.test(ua)) marca = "Motorola";
-  else if(/Xiaomi|Redmi|Mi/i.test(ua)) marca = "Xiaomi";
-  else if(/iPhone/i.test(ua)) marca = "iPhone";
+  if(/Samsung/i.test(ua)) marca="Samsung";
+  else if(/Motorola|Moto/i.test(ua)) marca="Motorola";
+  else if(/Xiaomi|Redmi|Mi/i.test(ua)) marca="Xiaomi";
+  else if(/iPhone/i.test(ua)) marca="iPhone";
 
-  const sistema = /Android/i.test(ua) ? "Android" : "Outro";
-  const w = screen.width;
-  const h = screen.height;
-  const dpi = Math.round(window.devicePixelRatio * 160);
+  const sistema=/Android/i.test(ua)?"Android":"Outro";
+  const w=screen.width;
+  const h=screen.height;
+  const dpi=Math.round(devicePixelRatio*160);
 
-  document.getElementById("deviceInfo").innerHTML = `
+  document.getElementById("deviceInfo").innerHTML=`
     Marca: ${marca}<br>
     Sistema: ${sistema}<br>
     Tela: ${w} × ${h}<br>
-    DPI aproximado: ${dpi}
+    DPI aprox.: ${dpi}
+  `;
+}
+
+/* DECISÃO FINAL */
+function obterTela(){
+  if(brandSel.value && modelSel.value){
+    const d=modelos[brandSel.value][modelSel.value];
+    return {w:d.w,h:d.h,modo:"Manual"};
+  }
+  return {w:screen.width,h:screen.height,modo:"Automático"};
+}
+
+/* GERAR CONFIG */
+function gerarConfiguracao(){
+  const tela=obterTela();
+  const largura=Math.round(tela.w*0.84);
+  const sens=Math.round(tela.w*0.32);
+
+  document.getElementById("result").innerHTML=`
+    Modo: <b>${tela.modo}</b><br>
+    Menor largura: ${largura}<br>
+    Sensibilidade base: ${sens}<br>
+    Tela usada: ${tela.w} × ${tela.h}
   `;
 }
 
 detectarAparelho();
 
-/* Service Worker */
+/* SERVICE WORKER */
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("./service.worker.js");
 }
