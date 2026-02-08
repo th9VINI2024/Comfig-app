@@ -13,10 +13,12 @@
   --text:#e5e7eb;
 }
 
-*{box-sizing:border-box;font-family:system-ui,Arial}
+*{
+  box-sizing:border-box;
+  font-family:system-ui, Arial;
+}
 
 body{
-  <h1 style="color:red">VERSÃO NOVA</h1>
   margin:0;
   background:#020617;
   color:var(--text);
@@ -28,7 +30,9 @@ header{
   font-weight:600;
 }
 
-.container{padding:16px}
+.container{
+  padding:16px;
+}
 
 .card{
   background:var(--card);
@@ -55,12 +59,12 @@ button{
 }
 </style>
 
-<!-- REMOVE CACHE ANTIGO -->
+<!-- LIMPA SERVICE WORKER ANTIGO -->
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(r =>
-    r.forEach(sw => sw.unregister())
-  );
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(sw => sw.unregister());
+  });
 }
 </script>
 
@@ -68,13 +72,15 @@ if ('serviceWorker' in navigator) {
 
 <body>
 
+<h1 style="color:red; text-align:center;">VERSÃO NOVA</h1>
+
 <header>Configuração ideal</header>
 
 <div class="container">
 
   <div class="card">
     <b>📱 Aparelho detectado</b>
-    <span id="deviceInfo"></span>
+    <span id="deviceInfo">Detectando...</span>
   </div>
 
   <div class="card">
@@ -87,8 +93,8 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <script>
-function clamp(v,min,max){
-  return Math.max(min,Math.min(max,v));
+function clamp(valor, min, max){
+  return Math.max(min, Math.min(max, valor));
 }
 
 function detectar(){
@@ -102,22 +108,22 @@ function detectar(){
 }
 
 function gerar(){
-  let menorLargura = clamp(screen.width, 360, 960);
+  const larguraBase = clamp(screen.width, 360, 960);
 
-  let geral = clamp(Math.round(menorLargura / 3), 0, 200);
+  const geral = clamp(Math.round(larguraBase / 3), 0, 200);
 
   document.getElementById("result").innerHTML = `
-    📐 Menor largura: <b>${menorLargura}</b><br><br>
+    📐 Menor largura: <b>${larguraBase}</b><br><br>
 
     🎯 Sensibilidades Free Fire<br>
     Geral: ${geral}<br>
-    Red Dot: ${clamp(geral-5,0,200)}<br>
-    Mira 2x: ${clamp(geral-15,0,200)}<br>
-    Mira 4x: ${clamp(geral-30,0,200)}<br>
-    AWM: ${clamp(geral-50,0,200)}<br><br>
+    Red Dot: ${clamp(geral - 5, 0, 200)}<br>
+    Mira 2x: ${clamp(geral - 15, 0, 200)}<br>
+    Mira 4x: ${clamp(geral - 30, 0, 200)}<br>
+    AWM: ${clamp(geral - 50, 0, 200)}<br><br>
 
-    ✔ Limites respeitados<br>
-    ✔ 360–960 / 0–200
+    ✔ Menor largura: 360–960<br>
+    ✔ Sensibilidade: 0–200
   `;
 }
 
