@@ -42,26 +42,27 @@ header{
   margin-bottom:8px;
 }
 
-select,button{
+button{
   width:100%;
   padding:14px;
   border-radius:12px;
   border:none;
-  font-size:15px;
-}
-
-select{
-  background:#020617;
-  color:#fff;
-  margin-bottom:10px;
-}
-
-button{
+  font-size:16px;
   background:var(--accent);
   color:#020617;
   font-weight:600;
 }
 </style>
+
+<!-- REMOVE CACHE ANTIGO -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(r =>
+    r.forEach(sw => sw.unregister())
+  );
+}
+</script>
+
 </head>
 
 <body>
@@ -72,22 +73,7 @@ button{
 
   <div class="card">
     <b>📱 Aparelho detectado</b>
-    <span id="deviceInfo">Detectando...</span>
-  </div>
-
-  <div class="card">
-    <b>📲 Escolher manualmente</b>
-
-    <select id="brand">
-      <option value="">Automático</option>
-      <option value="xiaomi">Xiaomi</option>
-      <option value="samsung">Samsung</option>
-      <option value="motorola">Motorola</option>
-    </select>
-
-    <select id="model" disabled>
-      <option value="">Selecione o modelo</option>
-    </select>
+    <span id="deviceInfo"></span>
   </div>
 
   <div class="card">
@@ -96,79 +82,41 @@ button{
   </div>
 
   <button onclick="gerar()">Gerar configuração</button>
+
 </div>
 
 <script>
-const modelos={
-  xiaomi:{
-    "Redmi 13C": 392,
-    "Redmi Note 7": 392
-  },
-  samsung:{
-    "Galaxy A10": 360
-  },
-  motorola:{
-    "Moto G05": 392
-  }
-};
-
-const brand=document.getElementById("brand");
-const model=document.getElementById("model");
-
-brand.onchange=()=>{
-  model.innerHTML='<option value="">Selecione o modelo</option>';
-  model.disabled=true;
-
-  if(!brand.value) return;
-
-  Object.keys(modelos[brand.value]).forEach(m=>{
-    const o=document.createElement("option");
-    o.value=m;
-    o.textContent=m;
-    model.appendChild(o);
-  });
-
-  model.disabled=false;
-};
-
 function clamp(v,min,max){
   return Math.max(min,Math.min(max,v));
 }
 
 function detectar(){
-  document.getElementById("deviceInfo").innerHTML=`
-    Tela detectada: ${screen.width} × ${screen.height}<br>
+  const w = screen.width;
+  const h = screen.height;
+
+  document.getElementById("deviceInfo").innerHTML = `
+    Tela detectada: ${w} × ${h}<br>
     Detecção automática ativa
   `;
 }
 
 function gerar(){
-  let menorLargura;
-  let modo="Automático";
+  let menorLargura = clamp(screen.width, 360, 960);
 
-  if(brand.value && model.value){
-    menorLargura=modelos[brand.value][model.value];
-    modo="Manual";
-  }else{
-    menorLargura=clamp(screen.width,360,960);
-  }
+  let geral = clamp(Math.round(menorLargura / 3), 0, 200);
 
-  let sensBase=clamp(Math.round(menorLargura/3),0,200);
-
-  document.getElementById("result").innerHTML=`
-    🧠 Modo: <b>${modo}</b><br><br>
-
+  document.getElementById("result").innerHTML = `
     📐 Menor largura: <b>${menorLargura}</b><br><br>
 
-    🎯 Sensibilidade Free Fire<br>
-    Geral: ${sensBase}<br>
-    Red Dot: ${clamp(sensBase-5,0,200)}<br>
-    Mira 2x: ${clamp(sensBase-15,0,200)}<br>
-    Mira 4x: ${clamp(sensBase-30,0,200)}<br>
-    AWM: ${clamp(sensBase-50,0,200)}<br><br>
+    🎯 Sensibilidades Free Fire<br>
+    Geral: ${geral}<br>
+    Red Dot: ${clamp(geral-5,0,200)}<br>
+    Mira 2x: ${clamp(geral-15,0,200)}<br>
+    Mira 4x: ${clamp(geral-30,0,200)}<br>
+    AWM: ${clamp(geral-50,0,200)}<br><br>
 
-    👉 Tudo dentro do limite 0–200<br>
-    👉 Sem multiplicação maluca 😌
+    ✔ Limites respeitados<br>
+    ✔ 360–960 / 0–200
   `;
 }
 
