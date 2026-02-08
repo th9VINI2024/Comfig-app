@@ -102,6 +102,7 @@ button{
 </div>
 
 <script>
+/* MODELOS */
 const modelos={
   xiaomi:{
     "Redmi 13C":{w:393,h:873},
@@ -134,9 +135,11 @@ brand.onchange=()=>{
   model.disabled=false;
 };
 
+/* DETECÇÃO AUTOMÁTICA */
 function detectar(){
   const ua=navigator.userAgent;
   let marca="Desconhecida";
+
   if(/Xiaomi|Redmi/i.test(ua)) marca="Xiaomi";
   else if(/Samsung/i.test(ua)) marca="Samsung";
   else if(/Moto/i.test(ua)) marca="Motorola";
@@ -147,6 +150,7 @@ function detectar(){
   `;
 }
 
+/* GERAR CONFIG */
 function gerar(){
   let w=screen.width;
   let h=screen.height;
@@ -158,10 +162,19 @@ function gerar(){
     modo="Manual";
   }
 
+  /* 🔥 MODO CAPA AUTOMÁTICO */
+  const proporcao = h / w;
+  const modoCapa = proporcao > 2.0;
+
+  /* 🎮 AJUSTES MAIS LEVES */
+  const menorLargura = Math.round(w * (modoCapa ? 0.80 : 0.85));
+  const sensiBase = Math.round(w * (modoCapa ? 0.26 : 0.29));
+
   document.getElementById("result").innerHTML=`
     Modo: <b>${modo}</b><br>
-    Menor largura: ${Math.round(w*0.84)}<br>
-    Sensibilidade base: ${Math.round(w*0.32)}<br>
+    Modo capa automático: <b>${modoCapa ? "ATIVADO" : "DESATIVADO"}</b><br><br>
+    📐 Menor largura: <b>${menorLargura}</b><br>
+    🎯 Sensibilidade base: <b>${sensiBase}</b><br>
     Tela usada: ${w} × ${h}
   `;
 }
