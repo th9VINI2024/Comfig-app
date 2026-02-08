@@ -152,33 +152,42 @@ function detectar(){
 
 /* GERAR CONFIG */
 function gerar(){
-  let w=screen.width;
-  let h=screen.height;
-  let modo="Automático";
+  let w = screen.width;
+  let h = screen.height;
+  let modo = "Automático";
 
+  // Se escolher manualmente
   if(brand.value && model.value){
-    const d=modelos[brand.value][model.value];
-    w=d.w; h=d.h;
-    modo="Manual";
+    const d = modelos[brand.value][model.value];
+    w = d.w;
+    h = d.h;
+    modo = "Manual";
   }
 
-  /* 🔥 MODO CAPA AUTOMÁTICO */
-  const proporcao = h / w;
-  const modoCapa = proporcao > 2.0;
+  /* 📐 MENOR LARGURA (360 → 960) */
+  let menorLargura = Math.round(w);
 
-  /* 🎮 AJUSTES MAIS LEVES */
-  const menorLargura = Math.round(w * (modoCapa ? 0.80 : 0.85));
-  const sensiBase = Math.round(w * (modoCapa ? 0.26 : 0.29));
+  if(menorLargura < 360) menorLargura = 360;
+  if(menorLargura > 960) menorLargura = 960;
 
-  document.getElementById("result").innerHTML=`
-    Modo: <b>${modo}</b><br>
-    Modo capa automático: <b>${modoCapa ? "ATIVADO" : "DESATIVADO"}</b><br><br>
+  /* 🎯 SENSIBILIDADE (0 → 200) */
+  let sensibilidade = Math.round((menorLargura - 360) / (960 - 360) * 200);
+
+  if(sensibilidade < 0) sensibilidade = 0;
+  if(sensibilidade > 200) sensibilidade = 200;
+
+  document.getElementById("result").innerHTML = `
+    🧠 Modo: <b>${modo}</b><br><br>
+
     📐 Menor largura: <b>${menorLargura}</b><br>
-    🎯 Sensibilidade base: <b>${sensiBase}</b><br>
-    Tela usada: ${w} × ${h}
+    🎯 Sensibilidade base: <b>${sensibilidade}</b><br><br>
+
+    📱 Tela usada: ${w} × ${h}<br><br>
+
+    👉 Se ficar rápido demais, reduza 5–10 no jogo<br>
+    👉 Se ficar lento, aumente 5–10
   `;
 }
-
 detectar();
 </script>
 
