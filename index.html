@@ -16,14 +16,11 @@
   --text:#e5e7eb;
 }
 
-*{
-  box-sizing:border-box;
-  font-family:system-ui, Arial;
-}
+*{box-sizing:border-box;font-family:system-ui,Arial}
 
 body{
   margin:0;
-  background:linear-gradient(180deg,#020617,#020617);
+  background:#020617;
   color:var(--text);
 }
 
@@ -33,50 +30,39 @@ header{
   font-weight:600;
 }
 
-.container{
-  padding:16px;
-}
+.container{padding:16px}
 
 .card{
   background:var(--card);
   border-radius:14px;
   padding:16px;
   margin-bottom:16px;
-  box-shadow:0 8px 30px rgba(0,0,0,.3);
 }
 
 .card b{
-  font-size:16px;
+  color:var(--accent);
   display:block;
   margin-bottom:8px;
-  color:var(--accent);
 }
 
-.card span{
-  line-height:1.6;
+select,button{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:none;
   font-size:15px;
 }
 
 select{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:none;
   background:#020617;
   color:#fff;
-  margin-top:8px;
+  margin-bottom:10px;
 }
 
 button{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:12px;
   background:var(--accent);
   color:#020617;
-  font-size:16px;
   font-weight:600;
-  cursor:pointer;
 }
 </style>
 </head>
@@ -87,125 +73,100 @@ button{
 
 <div class="container">
 
-  <!-- APARELHO DETECTADO -->
   <div class="card">
-    <b>📱 Aparelho detectado:</b>
+    <b>📱 Aparelho detectado</b>
     <span id="deviceInfo">Detectando...</span>
   </div>
 
-  <!-- SELEÇÃO MANUAL -->
   <div class="card">
-    <b>📲 Escolher aparelho manualmente (opcional)</b>
+    <b>📲 Escolher manualmente</b>
 
-    <select id="manualBrand">
+    <select id="brand">
       <option value="">Automático</option>
-      <option value="motorola">Motorola</option>
-      <option value="samsung">Samsung</option>
       <option value="xiaomi">Xiaomi</option>
+      <option value="samsung">Samsung</option>
+      <option value="motorola">Motorola</option>
     </select>
 
-    <select id="manualModel">
+    <select id="model" disabled>
       <option value="">Selecione o modelo</option>
     </select>
   </div>
 
-  <!-- RESULTADO -->
   <div class="card">
-    <b>⚙️ Configuração</b>
-    <span id="result">
-      Use a detecção automática ou escolha manualmente.
-    </span>
+    <b>⚙️ Resultado</b>
+    <span id="result">Nenhuma configuração gerada</span>
   </div>
 
-  <button onclick="gerarConfiguracao()">Gerar configuração</button>
-
+  <button onclick="gerar()">Gerar configuração</button>
 </div>
 
 <script>
-/* MODELOS */
-const modelos = {
-  motorola:{
-    "Moto G05":{w:391,h:870},
-    "Moto G22":{w:412,h:915}
+const modelos={
+  xiaomi:{
+    "Redmi 13C":{w:393,h:873},
+    "Redmi Note 7":{w:393,h:851}
   },
   samsung:{
-    "Galaxy A10":{w:360,h:760},
-    "Galaxy A20":{w:412,h:892}
+    "Galaxy A10":{w:360,h:760}
   },
-  xiaomi:{
-    "Redmi Note 7":{w:393,h:851},
-    "Redmi 9":{w:393,h:873},
-    "Redmi 13C":{w:393,h:873}
+  motorola:{
+    "Moto G05":{w:391,h:870}
   }
 };
 
-const brandSel = document.getElementById("manualBrand");
-const modelSel = document.getElementById("manualModel");
+const brand=document.getElementById("brand");
+const model=document.getElementById("model");
 
-brandSel.onchange = ()=>{
-  modelSel.innerHTML = `<option value="">Selecione o modelo</option>`;
-  if(!brandSel.value) return;
+brand.onchange=()=>{
+  model.innerHTML='<option value="">Selecione o modelo</option>';
+  model.disabled=true;
 
-  Object.keys(modelos[brandSel.value]).forEach(m=>{
-    const opt=document.createElement("option");
-    opt.value=m;
-    opt.textContent=m;
-    modelSel.appendChild(opt);
+  if(!brand.value) return;
+
+  Object.keys(modelos[brand.value]).forEach(m=>{
+    const o=document.createElement("option");
+    o.value=m;
+    o.textContent=m;
+    model.appendChild(o);
   });
+
+  model.disabled=false;
 };
 
-/* DETECÇÃO AUTOMÁTICA */
-function detectarAparelho(){
-  const ua = navigator.userAgent;
+function detectar(){
+  const ua=navigator.userAgent;
   let marca="Desconhecida";
-
-  if(/Samsung/i.test(ua)) marca="Samsung";
-  else if(/Motorola|Moto/i.test(ua)) marca="Motorola";
-  else if(/Xiaomi|Redmi|Mi/i.test(ua)) marca="Xiaomi";
-  else if(/iPhone/i.test(ua)) marca="iPhone";
-
-  const sistema=/Android/i.test(ua)?"Android":"Outro";
-  const w=screen.width;
-  const h=screen.height;
-  const dpi=Math.round(devicePixelRatio*160);
+  if(/Xiaomi|Redmi/i.test(ua)) marca="Xiaomi";
+  else if(/Samsung/i.test(ua)) marca="Samsung";
+  else if(/Moto/i.test(ua)) marca="Motorola";
 
   document.getElementById("deviceInfo").innerHTML=`
     Marca: ${marca}<br>
-    Sistema: ${sistema}<br>
-    Tela: ${w} × ${h}<br>
-    DPI aprox.: ${dpi}
+    Tela: ${screen.width} × ${screen.height}
   `;
 }
 
-/* DECISÃO FINAL */
-function obterTela(){
-  if(brandSel.value && modelSel.value){
-    const d=modelos[brandSel.value][modelSel.value];
-    return {w:d.w,h:d.h,modo:"Manual"};
-  }
-  return {w:screen.width,h:screen.height,modo:"Automático"};
-}
+function gerar(){
+  let w=screen.width;
+  let h=screen.height;
+  let modo="Automático";
 
-/* GERAR CONFIG */
-function gerarConfiguracao(){
-  const tela=obterTela();
-  const largura=Math.round(tela.w*0.84);
-  const sens=Math.round(tela.w*0.32);
+  if(brand.value && model.value){
+    const d=modelos[brand.value][model.value];
+    w=d.w; h=d.h;
+    modo="Manual";
+  }
 
   document.getElementById("result").innerHTML=`
-    Modo: <b>${tela.modo}</b><br>
-    Menor largura: ${largura}<br>
-    Sensibilidade base: ${sens}<br>
-    Tela usada: ${tela.w} × ${tela.h}
+    Modo: <b>${modo}</b><br>
+    Menor largura: ${Math.round(w*0.84)}<br>
+    Sensibilidade base: ${Math.round(w*0.32)}<br>
+    Tela usada: ${w} × ${h}
   `;
 }
 
-detectarAparelho();
-
-/* SERVICE WORKER */
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./service.worker.js");
-}
+detectar();
 </script>
 
 </body>
