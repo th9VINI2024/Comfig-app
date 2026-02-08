@@ -61,10 +61,8 @@ button{
 
 <!-- LIMPA SERVICE WORKER ANTIGO -->
 <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(sw => sw.unregister());
-  });
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js");
 }
 </script>
 
