@@ -6,117 +6,127 @@
 <title>Config Pro</title>
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b1d3a">
+<meta name="theme-color" content="#020617">
 
 <style>
+:root{
+  --bg:#020617;
+  --card:#0f172a;
+  --accent:#38bdf8;
+  --text:#e5e7eb;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:system-ui, Arial;
+}
+
 body{
   margin:0;
-  font-family:system-ui, Arial;
-  background:linear-gradient(180deg,#0b1d3a,#050b1a);
-  color:#fff;
-  padding:20px;
+  background:linear-gradient(180deg,#020617,#020617);
+  color:var(--text);
 }
-h1{text-align:center}
 
-select,button{
+/* Header */
+header{
+  padding:16px;
+  font-size:22px;
+  font-weight:600;
+}
+
+/* Container */
+.container{
+  padding:16px;
+}
+
+/* Card */
+.card{
+  background:var(--card);
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 8px 30px rgba(0,0,0,.3);
+}
+
+.card b{
+  font-size:16px;
+  display:block;
+  margin-bottom:8px;
+  color:var(--accent);
+}
+
+.card span{
+  line-height:1.6;
+  font-size:15px;
+}
+
+/* Button */
+button{
   width:100%;
   padding:14px;
-  border-radius:12px;
   border:none;
-  margin-top:12px;
+  border-radius:12px;
+  background:var(--accent);
+  color:#020617;
   font-size:16px;
-}
-
-button{
-  background:#38bdf8;
-  color:#000;
   font-weight:600;
   cursor:pointer;
-}
-
-.card{
-  background:#020617;
-  padding:16px;
-  border-radius:14px;
-  margin-top:20px;
-}
-
-.result{
-  margin-top:12px;
-  font-size:15px;
-  line-height:1.6;
-}
-
-.copy{
-  margin-top:12px;
-  background:#22c55e;
 }
 </style>
 </head>
 
 <body>
 
-<h1>Config Pro 📱🎯</h1>
+<header>Configuração ideal</header>
 
-<select>
-  <option>Detecção automática ativa</option>
-</select>
+<div class="container">
 
-<button onclick="gerar()">Gerar configuração</button>
-
-<div class="card">
-  <div class="result" id="res">
-    Gere a configuração para ver os valores
+  <!-- APARELHO DETECTADO -->
+  <div class="card">
+    <b>📱 Aparelho detectado:</b>
+    <span id="deviceInfo">Detectando...</span>
   </div>
-  <button class="copy" onclick="copiar()">📋 Copiar configuração</button>
+
+  <!-- EXEMPLO DE AÇÃO -->
+  <div class="card">
+    <b>⚙️ Configuração</b>
+    <span>
+      Use as informações do seu aparelho para gerar a sensibilidade
+      e menor largura ideais.
+    </span>
+  </div>
+
+  <button onclick="alert('Em breve 😻')">Gerar configuração</button>
+
 </div>
 
 <script>
-let textoCopiar = "";
+function detectarAparelho(){
+  const ua = navigator.userAgent;
+  let marca = "Desconhecida";
 
-function gerar(){
+  if(/Samsung/i.test(ua)) marca = "Samsung";
+  else if(/Motorola|Moto/i.test(ua)) marca = "Motorola";
+  else if(/Xiaomi|Redmi|Mi/i.test(ua)) marca = "Xiaomi";
+  else if(/iPhone/i.test(ua)) marca = "iPhone";
+
+  const sistema = /Android/i.test(ua) ? "Android" : "Outro";
   const w = screen.width;
   const h = screen.height;
+  const dpi = Math.round(window.devicePixelRatio * 160);
 
-  const menorLargura = Math.round(w * 0.84);
-
-  const geral = Math.round((w + h) / 10);
-  const redDot = Math.round(geral * 0.95);
-  const mira2x = Math.round(geral * 0.85);
-  const mira4x = Math.round(geral * 0.75);
-  const awm = Math.round(geral * 0.65);
-
-  textoCopiar = `
-Menor largura: ${menorLargura}
-Geral: ${geral}
-Red Dot: ${redDot}
-Mira 2x: ${mira2x}
-Mira 4x: ${mira4x}
-AWM: ${awm}
-`;
-
-  document.getElementById("res").innerHTML = `
-📐 <b>Menor largura:</b> ${menorLargura}<br><br>
-
-🎯 <b>Sensibilidades Free Fire</b><br>
-Geral: ${geral}<br>
-Red Dot: ${redDot}<br>
-Mira 2x: ${mira2x}<br>
-Mira 4x: ${mira4x}<br>
-AWM: ${awm}<br><br>
-
-📊 Tela detectada: ${w} x ${h}<br>
-Use como base e ajuste aos poucos.
-`;
+  document.getElementById("deviceInfo").innerHTML = `
+    Marca: ${marca}<br>
+    Sistema: ${sistema}<br>
+    Tela: ${w} × ${h}<br>
+    DPI aproximado: ${dpi}
+  `;
 }
 
-function copiar(){
-  if(!textoCopiar) return;
-  navigator.clipboard.writeText(textoCopiar);
-  alert("Configuração copiada 💖");
-}
+detectarAparelho();
 
-if ("serviceWorker" in navigator) {
+/* Service Worker */
+if("serviceWorker" in navigator){
   navigator.serviceWorker.register("./service.worker.js");
 }
 </script>
